@@ -12,7 +12,7 @@ int SymbolsCounter(const std::string& stringX, const char& charX) {
 
 int main()
 {
-    std::string symbs = "Hellol";
+    std::string symbs = "Hellolololo";
     char check = 'l';
     int myRes = SymbolsCounter(symbs, check);
     std::cout << myRes << std::endl;
