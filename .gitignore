@@ -2,3 +2,5 @@
 *.filters
 *.suo
 debug
+.vcxproj
+.user
