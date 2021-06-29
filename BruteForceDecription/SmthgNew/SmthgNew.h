@@ -11,7 +11,6 @@ void ExtractHash		(std::vector<unsigned char>& hashBuf,			std::vector<unsigned c
 void WriteFile			(const std::string& filePath,			const	std::vector<unsigned char>& buf);
 
 void Decrypt			(std::vector<unsigned char>& chipherText, std::vector<unsigned char>& sourceHash, std::vector<std::string>* containerPass, class GenPasswords* c_getPass, bool* isDecOK);
-
 void PasswordToKey		(std::string& password);
 
 bool DecryptAes			(const std::vector<unsigned char> cryptedText,	std::vector<unsigned char>& decryptedText);

@@ -22,9 +22,7 @@ unsigned char key[EVP_MAX_KEY_LENGTH];
 unsigned char iv[EVP_MAX_IV_LENGTH];
 
 
-
 std::mutex mut;
-
 
 void ReadFile(const std::string& filePath, std::vector<unsigned char>& buf)
 {
@@ -76,6 +74,7 @@ void PasswordToKey(std::string& password)
 
 bool DecryptAes(const std::vector<unsigned char> cryptedText, std::vector<unsigned char>& decryptedText)
 {
+
 	EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 	if (!EVP_DecryptInit_ex(ctx, EVP_aes_128_cbc(), NULL, key, iv))
 	{
@@ -128,28 +127,30 @@ void CompareHash(std::vector<unsigned char>& sourceHash, std::vector<unsigned ch
 		std::cout << "Correct password is " << pass << std::endl;
 		*isDecOK = true;
 	}
-
 };
 
-void Decrypt(std::vector<unsigned char>& chipherText, std::vector<unsigned char>& sourceHash, std::vector<std::string>* containerPass, class GenPasswords* getPass, bool* isDecOK)
+void Decrypt(std::vector<unsigned char>& chipherText, std::vector<unsigned char>& sourceHash, std::vector<std::string>* containerPass, class GenPasswords* c_getPass, bool* isDecOK) 
 {
 	std::vector<unsigned char> plainText;
 	std::vector<unsigned char> hashBuf;
 	std::string pass;
 
-	for (;*isDecOK != true;) {
+	for (; *isDecOK != true;) {
 		mut.lock();
-		getPass->Gen(containerPass);
+		c_getPass->Gen(containerPass);
 		std::vector<std::string>::iterator i_Pass = containerPass->begin();
+		i_Pass = containerPass->begin();
+
 		for (; *isDecOK != true;)
 		{
 
 			pass = *i_Pass;
 			++i_Pass;
 			PasswordToKey(pass);
-			if ((DecryptAes(chipherText, plainText)!= false)) 
+
+			if ((DecryptAes(chipherText, plainText) != false))
 			{
-				CompareHash(sourceHash, plainText,pass, isDecOK);
+				CompareHash(sourceHash, plainText, pass, isDecOK);
 			}
 			if (i_Pass == containerPass->end())
 			{

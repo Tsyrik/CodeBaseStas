@@ -15,7 +15,7 @@ GenPasswords::GenPasswords()
 };
 void GenPasswords::Gen(std::vector<std::string>* retPasswords)
 {
-	//mtxPass.lock();
+	mtxPass.lock();
 	retPasswords->clear();
 	size_t batchSize = 0;
 	for (; m_generatedPasswordsCount < m_totalPasswordsCount && batchSize < m_numberOfPass; ++m_generatedPasswordsCount, ++batchSize)
@@ -35,5 +35,5 @@ void GenPasswords::Gen(std::vector<std::string>* retPasswords)
 		retPasswords->push_back(m_genPass);
 		++m_guessc[0];
 	}
-	//mtxPass.unlock();
+	mtxPass.unlock();
 }
