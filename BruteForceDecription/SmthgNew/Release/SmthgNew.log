@@ -1,0 +1,8 @@
+﻿  SmthgNew.cpp
+  main.cpp
+D:\Programming\TsyrikCodeBaseStas\CodeBaseStas\BruteForceDecription\SmthgNew\main.cpp(20,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  Generating code
+  Previous IPDB and IOBJ mismatch, fall back to full compilation.
+  All 572 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  SmthgNew.vcxproj -> D:\Programming\TsyrikCodeBaseStas\CodeBaseStas\BruteForceDecription\Release\SmthgNew.exe

@@ -1,14 +1,9 @@
 #pragma once
-#include <vector>
-#include "SmthgNew.h"
-#include <thread>
-#include <mutex>
-#include <list>
 
 class GenPasswords {
 public:
 	GenPasswords();
-	void Gen(std::vector<std::string>* retPasswords);
+	void Gen(std::vector<std::string>& retPasswords);
 private:
 	static const size_t m_maxSize = 30;
 	const size_t m_charCount = 36;

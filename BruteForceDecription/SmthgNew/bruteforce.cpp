@@ -1,8 +1,5 @@
 #include <vector>
-#include "SmthgNew.h"
-#include <thread>
 #include <mutex>
-#include <list>
 #include "bruteforce.h"
 
 std::mutex mtxPass;
@@ -13,10 +10,10 @@ GenPasswords::GenPasswords()
 	for (size_t i = 1; i < m_maxSize; m_guessc[i++] = -1) {}
 	for (size_t i = 1; i <= m_maxSize; m_genPass[i++] = '\0') {}
 };
-void GenPasswords::Gen(std::vector<std::string>* retPasswords)
+void GenPasswords::Gen(std::vector<std::string>& retPasswords)
 {
 	mtxPass.lock();
-	retPasswords->clear();
+	retPasswords.clear();
 	size_t batchSize = 0;
 	for (; m_generatedPasswordsCount < m_totalPasswordsCount && batchSize < m_numberOfPass; ++m_generatedPasswordsCount, ++batchSize)
 	{
@@ -32,7 +29,7 @@ void GenPasswords::Gen(std::vector<std::string>* retPasswords)
 				m_genPass[j] = m_chars[m_guessc[j]];
 		}
 		m_genPass.resize(4);
-		retPasswords->push_back(m_genPass);
+		retPasswords.push_back(m_genPass);
 		++m_guessc[0];
 	}
 	mtxPass.unlock();
