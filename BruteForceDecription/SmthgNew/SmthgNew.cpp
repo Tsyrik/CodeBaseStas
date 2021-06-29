@@ -5,6 +5,12 @@
 #include <iostream>
 #include <filesystem>
 #include <thread>
+#include <mutex>
+#include <list>
+
+#include <windows.h>
+#include "bruteforce.h"
+
 
 #include "openssl/evp.h"
 #include <openssl/aes.h>
@@ -14,7 +20,11 @@
 
 unsigned char key[EVP_MAX_KEY_LENGTH];
 unsigned char iv[EVP_MAX_IV_LENGTH];
-namespace fs = std::filesystem;
+
+
+
+std::mutex mut;
+
 
 void ReadFile(const std::string& filePath, std::vector<unsigned char>& buf)
 {
@@ -64,30 +74,6 @@ void PasswordToKey(std::string& password)
 	}
 }
 
-void CalculateHash(const std::vector<unsigned char>& data, std::vector<unsigned char>& hash)
-{
-	std::vector<unsigned char> hashTmp(SHA256_DIGEST_LENGTH);
-
-	SHA256_CTX sha256;
-	SHA256_Init(&sha256);
-	SHA256_Update(&sha256, &data[0], data.size());
-	SHA256_Final(&hashTmp[0], &sha256);
-
-	hash.swap(hashTmp);
-}
-
-bool CompareHash(std::vector<unsigned char>& decryptedText, std::vector<unsigned char>& hash, std::vector<unsigned char>& sourceHash)
-{
-	CalculateHash(decryptedText, hash);
-	if (hash == sourceHash) {
-		return true;
-	}
-	else {
-		return false;
-	}
-
-};
-
 bool DecryptAes(const std::vector<unsigned char> cryptedText, std::vector<unsigned char>& decryptedText)
 {
 	EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
@@ -120,46 +106,57 @@ bool DecryptAes(const std::vector<unsigned char> cryptedText, std::vector<unsign
 	return true;
 }
 
-
-void Decrypt()
+void CalculateHash(std::vector<unsigned char>& hash, const std::vector<unsigned char>& decryptedText)
 {
 
-	std::vector<unsigned char> chipherText;
-	ReadFile("C:/chipher_text_brute_force", chipherText);
+	std::vector<unsigned char> hashTmp(SHA256_DIGEST_LENGTH);
 
-	std::vector<unsigned char> sourceHash;
-	ExtractHash(sourceHash, chipherText);
+	SHA256_CTX sha256;
+	SHA256_Init(&sha256);
+	SHA256_Update(&sha256, &decryptedText[0], decryptedText.size());
+	SHA256_Final(&hashTmp[0], &sha256);
 
+	hash.swap(hashTmp);
+}
+
+void CompareHash(std::vector<unsigned char>& sourceHash, std::vector<unsigned char>& decryptedText, std::string pass, bool* isDecOK)
+{
+	std::vector<unsigned char> hash;
+	CalculateHash(hash, decryptedText);
+	if (hash == sourceHash) {
+		WriteFile("C:/chipher_text_brute_forceD", decryptedText);
+		std::cout << "Correct password is " << pass << std::endl;
+		*isDecOK = true;
+	}
+
+};
+
+void Decrypt(std::vector<unsigned char>& chipherText, std::vector<unsigned char>& sourceHash, std::vector<std::string>* containerPass, class GenPasswords* getPass, bool* isDecOK)
+{
 	std::vector<unsigned char> plainText;
 	std::vector<unsigned char> hashBuf;
-
-	bool isDecOK = false;
-	int attempts = 0;
 	std::string pass;
-	std::ifstream is("C:/Long pass.txt", std::ios::binary);
 
-	for (; isDecOK = true; ++attempts) {
-		is >> pass;
+	for (;*isDecOK != true;) {
+		mut.lock();
+		getPass->Gen(containerPass);
+		std::vector<std::string>::iterator i_Pass = containerPass->begin();
+		for (; *isDecOK != true;)
+		{
 
-
-		PasswordToKey(pass);
-		if ((DecryptAes(chipherText, plainText) == false)) {
-			continue;
-		}
-		else {
-			CalculateHash(plainText, hashBuf);
-			if (hashBuf == sourceHash) {
-				break;
+			pass = *i_Pass;
+			++i_Pass;
+			PasswordToKey(pass);
+			if ((DecryptAes(chipherText, plainText)!= false)) 
+			{
+				CompareHash(sourceHash, plainText,pass, isDecOK);
 			}
-			else{
-				continue;
+			if (i_Pass == containerPass->end())
+			{
+				mut.unlock();
+				break;
 			}
 		}
 	}
-
-	std::cout <<"Correct password is " <<pass << std::endl;
-	std::cout << attempts << std::endl;
-
-	WriteFile("C:/chipher_text_brute_force", plainText);
+	mut.unlock();
 }
-
